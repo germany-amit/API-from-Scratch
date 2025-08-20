@@ -137,3 +137,48 @@ if st.button("Generate API from scratch"):
     st.download_button("Download API Project ZIP", zipbuf, file_name=f"{api_name.replace(' ','_')}_cradle.zip")
 
 st.info("Cradle-to-cradle API engineering: requirement → spec → backend → live API → client demo.")
+
+# --- Agentic AI Feedback: API Quality Score --------------------------------
+
+def evaluate_api_quality(endpoints):
+    """
+    Returns a simulated API Quality Score (0-10) based on simple heuristics.
+    """
+    score = 0
+    if not endpoints:
+        return 0
+    
+    # 1. Number of endpoints
+    if len(endpoints) >= 3:
+        score += 5
+    elif len(endpoints) == 2:
+        score += 3
+    else:
+        score += 1
+
+    # 2. CRUD coverage
+    methods = [ep['method'].upper() for ep in endpoints]
+    if 'GET' in methods and 'POST' in methods:
+        score += 3
+    elif 'GET' in methods or 'POST' in methods:
+        score += 1
+
+    # 3. Endpoint name clarity
+    clarity_count = sum(1 for ep in endpoints if len(ep['func_name']) > 3)
+    if clarity_count >= len(endpoints):
+        score += 2
+    elif clarity_count > 0:
+        score += 1
+
+    return score
+
+# Display Agentic AI Feedback after generation
+if endpoints:
+    quality_score = evaluate_api_quality(endpoints)
+    st.subheader("Agentic AI Feedback — API Quality Score")
+    st.info(f"Your generated API has a **Quality Score: {quality_score}/10**\n\n"
+            f"Score interpretation:\n"
+            f"- 0-3: Very basic / needs improvement\n"
+            f"- 4-6: Moderate quality, partially real-life applicable\n"
+            f"- 7-10: High quality, closely resembles a usable real-world API")
+
